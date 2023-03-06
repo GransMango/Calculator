@@ -8,7 +8,6 @@ public class Calculator extends JFrame {
     private List<JButton> numberButtons;
     private List<JButton> operandButtons;
     private JTextField equationTextField;
-    private StringBuilder currentInput;
     public Calculator() {
         super("Calculator");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -34,7 +33,7 @@ public class Calculator extends JFrame {
         String[] numberNames = {"Nine", "Eight", "Seven", "Six", "Five", "Four", "Three", "Two", "One", "Zero"};
         for (int i = 9; i >= 0; i--) {
             JButton button = new JButton();
-            button.setName(numberNames[i]);
+            button.setName(numberNames[9-i]);
             button.setText(String.valueOf(i));
             button.setBounds(x, y, width, height);
             buttonList.add(button);
@@ -82,61 +81,64 @@ public class Calculator extends JFrame {
     }
 
     private void createAction() {
-        currentInput = new StringBuilder();
         for (JButton button : numberButtons) {
             button.addActionListener(e -> {
-                currentInput.append(e.getActionCommand());
-                equationTextField.setText(currentInput.toString());
-                System.out.println(equationTextField.getText());
+                String content = equationTextField.getText();
+                content += button.getText();
+                equationTextField.setText(content);
             });
         }
         for (JButton button : operandButtons) {
             if (!button.getActionCommand().equals("=")) {
                 button.addActionListener(e -> {
-                    currentInput.append(e.getActionCommand());
-                    equationTextField.setText(currentInput.toString());
-                    System.out.println(e.getActionCommand());
+                    String content = equationTextField.getText();
+                    content += button.getText();
+                    equationTextField.setText(content);
                 });
             } else {
-                button.addActionListener(e -> solve(button));
+                button.addActionListener(e -> {
+                    String content = equationTextField.getText();
+                    content += button.getText();
+                    content += solve();
+                    equationTextField.setText(content);
+                });
             }
         }
     }
 
-    private void solve(JButton button) {
+    private String solve() {
         List<String> operands = new ArrayList<>();
         operandButtons.forEach(e -> operands.add(e.getActionCommand()));
         int operand = -1;
-        if (!equationTextField.getText().isEmpty()) {
-            for (int i = 0; i < operands.size(); i++) {
-                if (equationTextField.getText().contains(operands.get(i))) {
+        String equation_raw = equationTextField.getText();
+        if (!equation_raw.isEmpty()) {
+            for (int i = 0; i < operands.size()-1; i++) {
+                if (equation_raw.contains(operands.get(i))) {
                     operand = i;
+                    System.out.println(operands.get(i));
                 }
             }
         }
         if (operand == -1) {
-            equationTextField.setText("1");
-            currentInput.setLength(0);
-            return;
+            System.out.println("test");
+            return "-1";
         }
-        String[] equation;
+        String[] equation_split;
         if (operand == 2) {
-            equation = equationTextField.getText().split("\\+");
+            equation_split = equation_raw.split("\\+");
         } else if (operand == 3) {
-            equation = equationTextField.getText().split("\\-");
+            equation_split = equation_raw.split("\\-");
         } else {
-            equation = equationTextField.getText().split(operands.get(operand));
+            equation_split = equation_raw.split(operands.get(operand));
         }
-        switch (operand) {
-            case 0 ->
-                    equationTextField.setText(equation[0] + operands.get(operand) + equation[1] + "=" + (Double.parseDouble(equation[0]) / Double.parseDouble(equation[1])));
-            case 1 ->
-                    equationTextField.setText(equation[0] + operands.get(operand) + equation[1] + "=" + (Integer.parseInt(equation[0]) * Integer.parseInt(equation[1])));
-            case 2 ->
-                    equationTextField.setText(equation[0] + operands.get(operand) + equation[1] + "=" + (Integer.parseInt(equation[0]) + Integer.parseInt(equation[1])));
-            case 3 ->
-                    equationTextField.setText(equation[0] + operands.get(operand) + equation[1] + "=" + (Integer.parseInt(equation[0]) - Integer.parseInt(equation[1])));
+        if (operand == 0) {
+            return String.valueOf(Integer.parseInt(equation_split[0]) / Integer.parseInt(equation_split[1]));
+        } else if (operand == 1) {
+            return String.valueOf(Integer.parseInt(equation_split[0]) * Integer.parseInt(equation_split[1]));
+        } else if (operand == 2) {
+            return String.valueOf(Integer.parseInt(equation_split[0]) + Integer.parseInt(equation_split[1]));
+        } else {
+            return String.valueOf(Integer.parseInt(equation_split[0]) - Integer.parseInt(equation_split[1]));
         }
-        currentInput.setLength(0);
     }
 }
