@@ -115,7 +115,7 @@ public class Calculator extends JFrame {
 
         JButton dotButton = new JButton();
         dotButton.setName("Dot");
-        dotButton.setText(".");
+        dotButton.setText("");
         dotButton.setBounds(x-60, 360, width, height);
         stylizeButton(dotButton);
         functionalButtonList.add(dotButton);
